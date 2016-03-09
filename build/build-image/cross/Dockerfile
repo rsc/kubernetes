@@ -15,7 +15,7 @@
 # This file creates a standard build environment for building cross
 # platform go binary for the architecture kubernetes cares about.
 
-FROM  golang:1.5.3
+FROM  golang:1.4.2
 # Original MAINTAINER  Joe Beda <jbeda@google.com>
 MAINTAINER Brendan Burns <bburns@google.com>
 
@@ -25,7 +25,8 @@ ENV KUBE_CROSSPLATFORMS \
   windows/amd64 windows/386
 
 # Pre-compile the standard go library when cross-compiling. This is much easier now when we have go1.5
-RUN for platform in ${KUBE_CROSSPLATFORMS}; do GOOS=${platform%/*} GOARCH=${platform##*/} go install std; done
+# RUN for platform in ${KUBE_CROSSPLATFORMS}; do GOOS=${platform%/*} GOARCH=${platform##*/} go install std; done
+RUN cd /usr/src/go/src && for platform in ${KUBE_CROSSPLATFORMS}; do GOOS=${platform%/*} GOARCH=${platform##*/} ./make.bash --no-clean; done
 
 # Install g++, then download and install protoc for generating protobuf output
 RUN apt-get install -y g++ && apt-get clean && rm -rf /var/lib/apt/lists/* &&\
