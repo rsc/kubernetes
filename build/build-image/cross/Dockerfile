@@ -15,7 +15,7 @@
 # This file creates a standard build environment for building cross
 # platform go binary for the architecture kubernetes cares about.
 
-FROM  golang:1.5.3
+FROM  golang:1.6.0
 # Original MAINTAINER  Joe Beda <jbeda@google.com>
 MAINTAINER Brendan Burns <bburns@google.com>
 
