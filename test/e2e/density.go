@@ -72,7 +72,7 @@ func extractLatencyMetrics(latencies []podLatencyData) LatencyMetric {
 	perc50 := latencies[int(math.Ceil(float64(length*50)/100))-1].Latency
 	perc90 := latencies[int(math.Ceil(float64(length*90)/100))-1].Latency
 	perc99 := latencies[int(math.Ceil(float64(length*99)/100))-1].Latency
-	return LatencyMetric{Perc50: perc50, Perc90: perc90, Perc99: perc99}
+	return LatencyMetric{Perc50: perc50, Perc90: perc90, Perc99: perc99, Min: latencies[0].Latency, Max: latencies[length-1].Latency, N: length}
 }
 
 func density30AddonResourceVerifier() map[string]resourceConstraint {

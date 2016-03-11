@@ -117,6 +117,10 @@ type LatencyMetric struct {
 	Perc50 time.Duration `json:"Perc50"`
 	Perc90 time.Duration `json:"Perc90"`
 	Perc99 time.Duration `json:"Perc99"`
+	Min    time.Duration
+	Max    time.Duration
+	Sum    time.Duration
+	N      int
 }
 
 type PodStartupLatency struct {
@@ -175,6 +179,10 @@ func setQuantileAPICall(apicall APICall, quantile float64, latency time.Duration
 // Only 0.5, 0.9 and 0.99 quantiles are supported.
 func setQuantile(metric *LatencyMetric, quantile float64, latency time.Duration) {
 	switch quantile {
+	case -1:
+		metric.N = int(latency / time.Microsecond)
+	case -2:
+		metric.Sum = latency
 	case 0.5:
 		metric.Perc50 = latency
 	case 0.9:
@@ -204,19 +212,29 @@ func readLatencyMetrics(c *client.Client) (APIResponsiveness, error) {
 	for _, sample := range samples {
 		// Example line:
 		// apiserver_request_latencies_summary{resource="namespaces",verb="LIST",quantile="0.99"} 908
-		if sample.Metric[model.MetricNameLabel] != "apiserver_request_latencies_summary" {
-			continue
-		}
-
 		resource := string(sample.Metric["resource"])
 		verb := string(sample.Metric["verb"])
 		if ignoredResources.Has(resource) || ignoredVerbs.Has(verb) {
 			continue
 		}
-		latency := sample.Value
-		quantile, err := strconv.ParseFloat(string(sample.Metric[model.QuantileLabel]), 64)
-		if err != nil {
-			return a, err
+		var latency model.SampleValue
+		var quantile float64
+		switch sample.Metric[model.MetricNameLabel] {
+		default:
+			continue
+		case "apiserver_request_latencies_summary_count":
+			latency = sample.Value
+			quantile = -1
+		case "apiserver_request_latencies_summary_sum":
+			latency = sample.Value
+			quantile = -2
+		case "apiserver_request_latencies_summary":
+			latency = sample.Value
+			q, err := strconv.ParseFloat(string(sample.Metric[model.QuantileLabel]), 64)
+			if err != nil {
+				return a, err
+			}
+			quantile = q
 		}
 		a.addMetric(resource, verb, quantile, time.Duration(int64(latency))*time.Microsecond)
 	}
