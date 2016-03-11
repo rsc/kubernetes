@@ -39,7 +39,7 @@ tar xzf kubernetes-server-linux-amd64.tar.gz
 
 kubernetes/server/bin/kube-scheduler --master=127.0.0.1:8080 --v=2 &> /var/log/kube-scheduler.log &
 
-kubernetes/server/bin/kube-apiserver \
+GOGC=100 GODEBUG=gctrace=1 kubernetes/server/bin/kube-apiserver \
 	--portal-net=10.0.0.1/24 \
 	--address=0.0.0.0 \
 	--etcd-servers=http://127.0.0.1:4001 \
