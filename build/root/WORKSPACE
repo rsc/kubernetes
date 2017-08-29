@@ -39,7 +39,8 @@ http_archive(
     urls = ["https://github.com/bazelbuild/rules_docker/archive/8359263f35227a3634ea023ff4ae163189eb4b26.tar.gz"],
 )
 
-load("@io_bazel_rules_go//go:def.bzl", "go_repositories")
+#load("@io_bazel_rules_go//go:def.bzl", "go_repositories")
+load(":go-boringcrypto.bzl", "go_repositories")
 load("@io_bazel_rules_docker//docker:docker.bzl", "docker_repositories", "docker_pull")
 
 go_repositories(
